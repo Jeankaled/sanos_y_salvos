@@ -32,4 +32,22 @@ public class MascotaService {
         reporte.setMascota(mascota);
         return reporteRepository.save(reporte);
     }
+    // Método para Actualizar (Update)
+    public Mascota actualizarMascota(Long id, Mascota mascotaActualizada) {
+        // Buscamos si la mascota existe, si existe cambiamos sus datos y guardamos
+        return mascotaRepository.findById(id).map(mascotaExistente -> {
+            mascotaExistente.setNombre(mascotaActualizada.getNombre());
+            mascotaExistente.setEspecie(mascotaActualizada.getEspecie());
+            mascotaExistente.setEdad(mascotaActualizada.getEdad());
+            // Nota: Por regla de negocio, usualmente no se permite cambiar el dueño (usuarioId)
+            return mascotaRepository.save(mascotaExistente);
+        }).orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
+    }
+
+    // Método para Eliminar (Delete)
+    public void eliminarMascota(Long id) {
+        mascotaRepository.deleteById(id);
+    }
+
+
 }
