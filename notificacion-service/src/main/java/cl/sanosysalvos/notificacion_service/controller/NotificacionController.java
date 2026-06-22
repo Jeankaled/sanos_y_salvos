@@ -2,6 +2,7 @@ package cl.sanosysalvos.notificacion_service.controller;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,36 +14,43 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import cl.sanosysalvos.notificacion_service.model.Notificacion;
+import cl.sanosysalvos.notificacion_service.dto.NotificacionRequestDTO;
+import cl.sanosysalvos.notificacion_service.dto.NotificacionResponseDTO;
 import cl.sanosysalvos.notificacion_service.service.NotificacionService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/notificaciones")
 public class NotificacionController {
-    private final NotificacionService service;
 
-    public NotificacionController(NotificacionService service) {
-        this.service = service;
-    }
+    @Autowired
+    private NotificacionService notificacionService;
 
     @PostMapping
-    public ResponseEntity<Notificacion> crear(@RequestBody Notificacion notificacion) {
-        return new ResponseEntity<>(service.crearNotificacion(notificacion), HttpStatus.CREATED);
+    public ResponseEntity<NotificacionResponseDTO> crearNotificacion(@Valid @RequestBody NotificacionRequestDTO requestDTO) {
+        return new ResponseEntity<>(notificacionService.crearNotificacion(requestDTO), HttpStatus.CREATED);
     }
 
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Notificacion>> listar(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(service.listarPorUsuario(usuarioId));
+    @GetMapping
+    public ResponseEntity<List<NotificacionResponseDTO>> listarNotificaciones() {
+        return new ResponseEntity<>(notificacionService.obtenerTodas(), HttpStatus.OK);
     }
 
-    @PutMapping("/{id}/leido")
-    public ResponseEntity<Notificacion> leer(@PathVariable Long id) {
-        return ResponseEntity.ok(service.marcarComoLeida(id));
+    @GetMapping("/{id}")
+    public ResponseEntity<NotificacionResponseDTO> obtenerNotificacionPorId(@PathVariable Long id) {
+        return new ResponseEntity<>(notificacionService.obtenerPorId(id), HttpStatus.OK);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<NotificacionResponseDTO> actualizarNotificacion(
+            @PathVariable Long id, 
+            @Valid @RequestBody NotificacionRequestDTO requestDTO) {
+        return new ResponseEntity<>(notificacionService.actualizarNotificacion(id, requestDTO), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
-        service.eliminarNotificacion(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Void> eliminarNotificacion(@PathVariable Long id) {
+        notificacionService.eliminarNotificacion(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

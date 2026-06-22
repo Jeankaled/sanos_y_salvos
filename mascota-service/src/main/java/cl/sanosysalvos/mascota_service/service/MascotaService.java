@@ -1,14 +1,15 @@
 package cl.sanosysalvos.mascota_service.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import cl.sanosysalvos.mascota_service.dto.MascotaRequestDTO;
+import cl.sanosysalvos.mascota_service.dto.MascotaResponseDTO;
 import cl.sanosysalvos.mascota_service.model.Mascota;
-import cl.sanosysalvos.mascota_service.model.Reporte;
 import cl.sanosysalvos.mascota_service.repository.MascotaRepository;
-import cl.sanosysalvos.mascota_service.repository.ReporteRepository;
 
 @Service
 public class MascotaService {
@@ -16,38 +17,62 @@ public class MascotaService {
     @Autowired
     private MascotaRepository mascotaRepository;
 
-    @Autowired
-    private ReporteRepository reporteRepository;
+    // 1. POST: Registrar Mascota
+    public MascotaResponseDTO registrarMascota(MascotaRequestDTO request) {
+        Mascota mascota = new Mascota();
+        mascota.setNombre(request.getNombre());
+        mascota.setEspecie(request.getEspecie());
+        mascota.setEdad(request.getEdad());
+        mascota.setUsuarioId(request.getUsuarioId());
 
-    public Mascota registrarMascota(Mascota mascota) {
-        return mascotaRepository.save(mascota); // Guarda la mascota
+        Mascota mascotaGuardada = mascotaRepository.save(mascota);
+        return mapearADTO(mascotaGuardada);
     }
 
-    public List<Mascota> obtenerTodas() {
-        return mascotaRepository.findAll();
+    // 2. GET: Obtener todas las mascotas
+    public List<MascotaResponseDTO> obtenerTodas() {
+        return mascotaRepository.findAll().stream()
+                .map(this::mapearADTO)
+                .collect(Collectors.toList());
     }
 
-    public Reporte registrarReporte(Long mascotaId, Reporte reporte) {
-        Mascota mascota = mascotaRepository.findById(mascotaId).orElseThrow();
-        reporte.setMascota(mascota);
-        return reporteRepository.save(reporte);
-    }
-    // Método para Actualizar (Update)
-    public Mascota actualizarMascota(Long id, Mascota mascotaActualizada) {
-        // Buscamos si la mascota existe, si existe cambiamos sus datos y guardamos
-        return mascotaRepository.findById(id).map(mascotaExistente -> {
-            mascotaExistente.setNombre(mascotaActualizada.getNombre());
-            mascotaExistente.setEspecie(mascotaActualizada.getEspecie());
-            mascotaExistente.setEdad(mascotaActualizada.getEdad());
-            // Nota: Por regla de negocio, usualmente no se permite cambiar el dueño (usuarioId)
-            return mascotaRepository.save(mascotaExistente);
-        }).orElseThrow(() -> new RuntimeException("Mascota no encontrada"));
+    // 3. GET: Obtener por ID
+    public MascotaResponseDTO obtenerPorId(Long id) {
+        Mascota mascota = mascotaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mascota no encontrada con ID: " + id));
+        return mapearADTO(mascota);
     }
 
-    // Método para Eliminar (Delete)
+    // 4. PUT: Actualizar mascota
+    public MascotaResponseDTO actualizarMascota(Long id, MascotaRequestDTO request) {
+        Mascota mascota = mascotaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Mascota no encontrada con ID: " + id));
+
+        mascota.setNombre(request.getNombre());
+        mascota.setEspecie(request.getEspecie());
+        mascota.setEdad(request.getEdad());
+        mascota.setUsuarioId(request.getUsuarioId());
+
+        Mascota mascotaActualizada = mascotaRepository.save(mascota);
+        return mapearADTO(mascotaActualizada);
+    }
+
+    // 5. DELETE: Eliminar mascota
     public void eliminarMascota(Long id) {
+        if (!mascotaRepository.existsById(id)) {
+            throw new RuntimeException("Mascota no encontrada con ID: " + id);
+        }
         mascotaRepository.deleteById(id);
     }
 
-
+    // Método auxiliar privado para no repetir código
+    private MascotaResponseDTO mapearADTO(Mascota mascota) {
+        MascotaResponseDTO dto = new MascotaResponseDTO();
+        dto.setId(mascota.getId());
+        dto.setNombre(mascota.getNombre());
+        dto.setEspecie(mascota.getEspecie());
+        dto.setEdad(mascota.getEdad());
+        dto.setUsuarioId(mascota.getUsuarioId());
+        return dto;
+    }
 }

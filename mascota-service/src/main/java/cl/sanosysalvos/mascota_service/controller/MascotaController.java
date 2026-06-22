@@ -14,9 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import cl.sanosysalvos.mascota_service.model.Mascota;
-import cl.sanosysalvos.mascota_service.model.Reporte;
+import cl.sanosysalvos.mascota_service.dto.MascotaRequestDTO;
+import cl.sanosysalvos.mascota_service.dto.MascotaResponseDTO;
 import cl.sanosysalvos.mascota_service.service.MascotaService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/mascotas")
@@ -26,33 +27,30 @@ public class MascotaController {
     private MascotaService mascotaService;
 
     @PostMapping
-    public ResponseEntity<Mascota> registrarMascota(@RequestBody Mascota mascota) {
-        return new ResponseEntity<>(mascotaService.registrarMascota(mascota), HttpStatus.CREATED);
+    public ResponseEntity<MascotaResponseDTO> registrarMascota(@Valid @RequestBody MascotaRequestDTO requestDTO) {
+        return new ResponseEntity<>(mascotaService.registrarMascota(requestDTO), HttpStatus.CREATED);
     }
 
     @GetMapping
-    public ResponseEntity<List<Mascota>> listarMascotas() {
+    public ResponseEntity<List<MascotaResponseDTO>> listarMascotas() {
         return new ResponseEntity<>(mascotaService.obtenerTodas(), HttpStatus.OK);
     }
 
-    @PostMapping("/{id}/reportes")
-    public ResponseEntity<Reporte> agregarReporte(@PathVariable Long id, @RequestBody Reporte reporte) {
-        return new ResponseEntity<>(mascotaService.registrarReporte(id, reporte), HttpStatus.CREATED);
+    @GetMapping("/{id}")
+    public ResponseEntity<MascotaResponseDTO> obtenerMascotaPorId(@PathVariable Long id) {
+        return new ResponseEntity<>(mascotaService.obtenerPorId(id), HttpStatus.OK);
     }
 
-    // Endpoint para Actualizar (PUT)
     @PutMapping("/{id}")
-    public ResponseEntity<Mascota> actualizarMascota(@PathVariable Long id, @RequestBody Mascota mascota) {
-        Mascota mascotaActualizada = mascotaService.actualizarMascota(id, mascota);
-        return new ResponseEntity<>(mascotaActualizada, HttpStatus.OK);
+    public ResponseEntity<MascotaResponseDTO> actualizarMascota(
+            @PathVariable Long id, 
+            @Valid @RequestBody MascotaRequestDTO requestDTO) {
+        return new ResponseEntity<>(mascotaService.actualizarMascota(id, requestDTO), HttpStatus.OK);
     }
 
-    // Endpoint para Eliminar (DELETE)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminarMascota(@PathVariable Long id) {
         mascotaService.eliminarMascota(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); // Retorna un 204 Sin Contenido
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
 }
