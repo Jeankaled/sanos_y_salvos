@@ -1,0 +1,79 @@
+version: "3.8"
+
+services:
+  # Base de datos centralizada para todos los servicios
+  db:
+    image: postgres:15
+    container_name: postgres_db
+    environment:
+      POSTGRES_DB: sanos_y_salvos_db
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    networks:
+      - sanos-network
+
+  # Microservicio de Usuarios
+  usuario-service:
+    image: usuario-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
+    networks:
+      - sanos-network
+
+  # Microservicio de Mascotas
+  mascota-service:
+    image: mascota-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
+    networks:
+      - sanos-network
+
+  # Microservicio de Notificaciones
+  notificacion-service:
+    image: notificacion-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
+    networks:
+      - sanos-network
+
+  # Microservicio de Datos y Analítica
+  datos-analitica-service:
+    image: datos-analitica-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
+    networks:
+      - sanos-network
+
+  # Microservicio de Integración Externa
+  integracion-externa-service:
+    image: integracion-externa-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
+      SPRING_DATASOURCE_USERNAME: user
+      SPRING_DATASOURCE_PASSWORD: password
+    depends_on:
+      - db
+    networks:
+      - sanos-network
+
+networks:
+  sanos-network:
+    driver: bridge
