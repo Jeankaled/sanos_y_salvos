@@ -1,0 +1,68 @@
+name: Sanos y Salvos CI/CD
+
+on:
+  push:
+    branches:
+      - feature/pipeline-cicd
+      - develop
+      - main
+
+jobs:
+  build-and-push-images:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Descargar código del repositorio
+        uses: actions/checkout@v3
+
+      - name: 2. Configurar Java 21 (Temurin)
+        uses: actions/setup-java@v3
+        with:
+          java-version: "21"
+          distribution: "temurin"
+          cache: maven
+
+      - name: 3. Iniciar sesión en Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: 4. Construir y Subir - Usuario Service
+        run: |
+          cd usuario-service
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/usuario-service:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/usuario-service:latest
+
+      - name: 5. Construir y Subir - Mascota Service
+        run: |
+          cd mascota-service
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/mascota-service:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/mascota-service:latest
+
+      - name: 6. Construir y Subir - Notificacion Service
+        run: |
+          cd notificacion-service
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/notificacion-service:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/notificacion-service:latest
+
+      - name: 7. Construir y Subir - Datos Analitica Service
+        run: |
+          cd datos-analitica-service
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/datos-analitica-service:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/datos-analitica-service:latest
+
+      - name: 8. Construir y Subir - Integracion Externa Service
+        run: |
+          cd integracion-externa-service
+          chmod +x mvnw
+          ./mvnw clean package -DskipTests
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/integracion-externa-service:latest .
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/integracion-externa-service:latest
