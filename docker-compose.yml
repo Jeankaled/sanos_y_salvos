@@ -1,79 +1,118 @@
 version: "3.8"
 
 services:
-  # Base de datos centralizada para todos los servicios
+  # Base de datos centralizada
   db:
     image: postgres:15
     container_name: postgres_db
     environment:
       POSTGRES_DB: sanos_y_salvos_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
     ports:
       - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
     networks:
       - sanos-network
 
   # Microservicio de Usuarios
   usuario-service:
-    image: usuario-service
+    image: jeankaled/usuario-service:latest
+    ports:
+      - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
     depends_on:
       - db
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
     networks:
       - sanos-network
 
   # Microservicio de Mascotas
   mascota-service:
-    image: mascota-service
+    image: jeankaled/mascota-service:latest
+    ports:
+      - "8081:8081"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
     depends_on:
       - db
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
     networks:
       - sanos-network
 
   # Microservicio de Notificaciones
   notificacion-service:
-    image: notificacion-service
+    image: jeankaled/notificacion-service:latest
+    ports:
+      - "8082:8082"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
     depends_on:
       - db
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
     networks:
       - sanos-network
 
   # Microservicio de Datos y Analítica
   datos-analitica-service:
-    image: datos-analitica-service
+    image: jeankaled/datos-analitica-service:latest
+    ports:
+      - "8084:8084"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
     depends_on:
       - db
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
     networks:
       - sanos-network
 
   # Microservicio de Integración Externa
   integracion-externa-service:
-    image: integracion-externa-service
+    image: jeankaled/integracion-externa-service:latest
+    ports:
+      - "8083:8083"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/sanos_y_salvos_db
-      SPRING_DATASOURCE_USERNAME: user
-      SPRING_DATASOURCE_PASSWORD: password
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: admin
     depends_on:
       - db
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
     networks:
       - sanos-network
 
+volumes:
+  postgres_data:
+
 networks:
   sanos-network:
-    driver: bridge
+    driver: overlay
