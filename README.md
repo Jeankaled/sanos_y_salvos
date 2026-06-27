@@ -1,4 +1,3 @@
-<img width="1156" height="837" alt="image" src="https://github.com/user-attachments/assets/2598821c-e516-4a40-9ffa-81ca22332639" />
 Descripción de la Arquitectura
 El sistema implementa una arquitectura orientada a microservicios desacoplados, comunicados mediante una puerta de enlace centralizada y procesamiento asíncrono para notificaciones críticas.
 
