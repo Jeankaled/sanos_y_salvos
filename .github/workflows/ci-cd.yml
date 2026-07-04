@@ -6,6 +6,7 @@ on:
       - feature/pipeline-cicd
       - develop
       - main
+      - feature/fix-cicd-sqs-lambda # Aseguramos que se ejecute en la rama actual
 
 jobs:
   build-and-push-images:
@@ -66,3 +67,28 @@ jobs:
           ./mvnw clean package -DskipTests
           docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/integracion-externa-service:latest .
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/integracion-externa-service:latest
+
+  # ---------------------------------------------------------
+  # NUEVO: ETAPA DE CONTINUOUS DEPLOYMENT (CD) EN DOCKER SWARM
+  # ---------------------------------------------------------
+  deploy-to-swarm:
+    needs: build-and-push-images
+    runs-on: ubuntu-latest
+    steps:
+      - name: Desplegar en Docker Swarm (CD)
+        uses: appleboy/ssh-action@v0.1.10
+        with:
+          host: ${{ secrets.SWARM_MANAGER_IP }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "Iniciando actualización de servicios en Docker Swarm..."
+
+            # Ajusta el nombre "sanos_stack" por el nombre real de tu stack en Swarm
+            docker service update --image ${{ secrets.DOCKERHUB_USERNAME }}/usuario-service:latest --force sanos_stack_usuario-service
+            docker service update --image ${{ secrets.DOCKERHUB_USERNAME }}/mascota-service:latest --force sanos_stack_mascota-service
+            docker service update --image ${{ secrets.DOCKERHUB_USERNAME }}/notificacion-service:latest --force sanos_stack_notificacion-service
+            docker service update --image ${{ secrets.DOCKERHUB_USERNAME }}/datos-analitica-service:latest --force sanos_stack_datos-analitica-service
+            docker service update --image ${{ secrets.DOCKERHUB_USERNAME }}/integracion-externa-service:latest --force sanos_stack_integracion-externa-service
+
+            echo "¡Todos los microservicios han sido actualizados exitosamente!"
