@@ -1,62 +1,63 @@
-Descripción de la Arquitectura
-El sistema implementa una arquitectura orientada a microservicios desacoplados, comunicados mediante una puerta de enlace centralizada y procesamiento asíncrono para notificaciones críticas.
+Proyecto Sanos y Salvos
+1. Descripción de la Arquitectura
+El sistema implementa una arquitectura orientada a microservicios altamente desacoplados, diseñados para escalabilidad y mantenibilidad. La comunicación se centraliza a través de un AWS API Gateway y se integra con un flujo de procesamiento asíncrono para notificaciones críticas, garantizando una alta disponibilidad.
 
 Microservicios:
-usuario-service: Gestión de usuarios y perfiles.
+usuario-service: Gestión de perfiles y autenticación.
 
-mascota-service: Registro y seguimiento de mascotas.
+mascota-service: Registro, seguimiento y gestión de estado de mascotas.
 
-notificacion-service: Manejo de alertas y avisos.
+notificacion-service: Manejo centralizado de alertas y avisos.
 
-datos-analitica-service: Procesamiento de métricas.
+datos-analitica-service: Procesamiento y visualización de métricas del sistema.
 
-integracion-externa-service: Conexión con servicios externos.
+integracion-externa-service: Orquestación con servicios de terceros.
 
- Guía de Despliegue y Ejecución
-1. Compilación del Código (Maven)
-Para compilar y empaquetar cada uno de los microservicios desde la raíz del proyecto, ejecuta el siguiente comando:
+2. Guía de Despliegue y Ejecución
+Compilación (Maven)
+Desde la raíz del proyecto, compila y genera los artefactos:
+bash
+   mvn clean install
+Despliegue en la Nube (Docker Swarm)
+Para desplegar la infraestructura en el clúster de AWS (Nodo Manager):
 
-mvn clean install
+Inicializar el clúster (si no está activo):
+bash
+    docker swarm init
+Despliegue del Stack:
+bash
+    docker stack deploy -c docker-compose.yml sanos_stack
+Verificación:
+    docker service ls
 
-2. Despliegue en la Nube (Docker Swarm)
-Para desplegar la infraestructura completa en el clúster de AWS, sigue estos pasos desde el nodo Manager:
+3. Arquitectura Asíncrona (Event-Driven)
+El sistema desacopla procesos pesados (como el envío de notificaciones) para reducir la latencia de respuesta al usuario:
 
-Inicializar el clúster:
-docker swarm init
+AWS SQS (sanos-y-salvos-queue): Actúa como buffer de mensajes. El microservicio de mascota-service publica eventos en la cola sin esperar respuesta.
 
-Desplegar el stack utilizando el archivo de configuración:
-docker stack deploy -c docker-compose.yml sanos_stack
+AWS Lambda (EnviarNotificacionLambda): Función Serverless que consume los mensajes de la cola de forma automática y asíncrona, procesando la lógica de negocio sin bloquear el hilo principal de la aplicación.
 
-Verificar el estado de los servicios:
-docker service ls
+4. Consumo de API
+El acceso está protegido y enrutado mediante AWS API Gateway.
 
-Consumo de API (API Gateway)
-Para asegurar la comunicación, el sistema utiliza un API Gateway de AWS que enruta las peticiones de forma profesional hacia nuestro clúster de contenedores.
+URL Base: https://85hv2hgk85.execute-api.us-east-1.amazonaws.com
 
-URL Base: https://otbwgd55eb.execute-api.us-east-1.amazonaws.com
+Endpoints principales:
 
-Endpoints disponibles:
+GET /mascotas: Lista todas las mascotas.
 
-GET /usuarios: Lista todos los usuarios.
+POST /mascotas: Registra una nueva mascota y dispara el flujo asíncrono de notificación.
 
-POST /usuarios: Registra un nuevo usuario.
+5. CI/CD (GitHub Actions)
+Automatización completa del ciclo de vida del software:
 
-GET /mascotas: Lista las mascotas registradas.
+Build: Validación de código con Maven.
 
-POST /mascotas: Registra una mascota extraviada.
+Containerize: Construcción de imágenes Docker optimizadas.
 
-Procesamiento Asíncrono (Serverless)
-El sistema utiliza una arquitectura orientada a eventos para desacoplar el envío de notificaciones:
+Push: Despliegue automático de imágenes al registro en Docker Hub.
 
-AWS SQS: Cola de mensajes (sanos-notificaciones-queue) que recibe alertas.
+6. Consideraciones Técnicas y Seguridad
+Gestión de Secretos: Las credenciales de AWS (AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_SESSION_TOKEN) son inyectadas mediante Variables de Entorno para evitar la exposición de secretos en el control de versiones.
 
-AWS Lambda: Función Serverless (procesar-notificacion-sanos) que se activa automáticamente al recibir un mensaje en la cola para procesar la notificación sin bloquear el flujo principal del usuario.
-
-CI/CD (GitHub Actions)
-Todo el ciclo de vida está automatizado. Cada push a la rama main dispara el flujo de GitHub Actions:
-
-Build: Compilación con Maven.
-
-Containerize: Construcción de imágenes Docker.
-
-Push: Envío de imágenes al registro en Docker Hub.
+Resiliencia: Configuración de HikariCP con maximum-pool-size: 5 para optimizar el uso de conexiones a la base de datos y evitar el error FATAL: too many clients.
