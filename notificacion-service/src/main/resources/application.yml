@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: notificacion-service
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+        session-token: ${AWS_SESSION_TOKEN}
+
+aws:
+  sqs:
+    queue-name: sanos-y-salvos-queue

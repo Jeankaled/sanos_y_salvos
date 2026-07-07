@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: mascota-service
+  cloud:
+    aws:
+      region:
+        static: us-east-1
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+        session-token: ${AWS_SESSION_TOKEN} # <-- Esta es obligatoria en Academy
+
+aws:
+  sqs:
+    queue-name: sanos-y-salvos-queue

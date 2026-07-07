@@ -3,21 +3,27 @@ package cl.sanosysalvos.mascota_service.service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import cl.sanosysalvos.mascota_service.dto.MascotaRequestDTO;
 import cl.sanosysalvos.mascota_service.dto.MascotaResponseDTO;
+import cl.sanosysalvos.mascota_service.infrastructure.messaging.SqsNotificationProducer;
 import cl.sanosysalvos.mascota_service.model.Mascota;
 import cl.sanosysalvos.mascota_service.repository.MascotaRepository;
 
 @Service
 public class MascotaService {
 
-    @Autowired
-    private MascotaRepository mascotaRepository;
+    private final MascotaRepository mascotaRepository;
+    private final SqsNotificationProducer sqsProducer;
 
-    // 1. POST: Registrar Mascota
+    // Inyección por constructor 
+    public MascotaService(MascotaRepository mascotaRepository, SqsNotificationProducer sqsProducer) {
+        this.mascotaRepository = mascotaRepository;
+        this.sqsProducer = sqsProducer;
+    }
+
+    // 1. POST: Registrar Mascota (CON NOTIFICACIÓN SQS)
     public MascotaResponseDTO registrarMascota(MascotaRequestDTO request) {
         Mascota mascota = new Mascota();
         mascota.setNombre(request.getNombre());
@@ -26,10 +32,17 @@ public class MascotaService {
         mascota.setUsuarioId(request.getUsuarioId());
 
         Mascota mascotaGuardada = mascotaRepository.save(mascota);
+        
+        // Disparamos el evento a la cola SQS
+        sqsProducer.enviarEventoMascotaPerdida(
+            mascotaGuardada.getId().toString(), 
+            mascotaGuardada.getNombre()
+        );
+
         return mapearADTO(mascotaGuardada);
     }
 
-    // 2. GET: Obtener todas las mascotas
+    // 2. GET: Obtener todas
     public List<MascotaResponseDTO> obtenerTodas() {
         return mascotaRepository.findAll().stream()
                 .map(this::mapearADTO)
@@ -43,7 +56,7 @@ public class MascotaService {
         return mapearADTO(mascota);
     }
 
-    // 4. PUT: Actualizar mascota
+    // 4. PUT: Actualizar
     public MascotaResponseDTO actualizarMascota(Long id, MascotaRequestDTO request) {
         Mascota mascota = mascotaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Mascota no encontrada con ID: " + id));
@@ -53,11 +66,10 @@ public class MascotaService {
         mascota.setEdad(request.getEdad());
         mascota.setUsuarioId(request.getUsuarioId());
 
-        Mascota mascotaActualizada = mascotaRepository.save(mascota);
-        return mapearADTO(mascotaActualizada);
+        return mapearADTO(mascotaRepository.save(mascota));
     }
 
-    // 5. DELETE: Eliminar mascota
+    // 5. DELETE: Eliminar
     public void eliminarMascota(Long id) {
         if (!mascotaRepository.existsById(id)) {
             throw new RuntimeException("Mascota no encontrada con ID: " + id);
@@ -65,7 +77,6 @@ public class MascotaService {
         mascotaRepository.deleteById(id);
     }
 
-    // Método auxiliar privado para no repetir código
     private MascotaResponseDTO mapearADTO(Mascota mascota) {
         MascotaResponseDTO dto = new MascotaResponseDTO();
         dto.setId(mascota.getId());
