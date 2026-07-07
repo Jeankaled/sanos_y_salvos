@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
       hikari:
-      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      maximum-pool-size: 5
       connection-timeout: 30000
     ports:
       - "5432:5432"
@@ -27,18 +27,18 @@ services:
   usuario-service:
     image: jeankaled/usuario-service:latest
     ports:
-      - "8080:8080"
+      - "8081:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_usuarios
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       hikari:
-      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      maximum-pool-size: 5
       connection-timeout: 30000
     depends_on:
       - db
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     networks:
@@ -48,18 +48,18 @@ services:
   mascota-service:
     image: jeankaled/mascota-service:latest
     ports:
-      - "8081:8081"
+      - "8082:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_mascota
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       hikari:
-      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      maximum-pool-size: 5
       connection-timeout: 30000
     depends_on:
       - db
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     networks:
@@ -69,18 +69,18 @@ services:
   notificacion-service:
     image: jeankaled/notificacion-service:latest
     ports:
-      - "8082:8082"
+      - "8083:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_notificaciones
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       hikari:
-      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      maximum-pool-size: 5
       connection-timeout: 30000
     depends_on:
       - db
     deploy:
-      replicas: 2
+      replicas: 1
       restart_policy:
         condition: on-failure
     networks:
@@ -90,13 +90,13 @@ services:
   datos-analitica-service:
     image: jeankaled/datos-analitica-service:latest
     ports:
-      - "8084:8084"
+      - "8084:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_analitica
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       hikari:
-      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      maximum-pool-size: 5
       connection-timeout: 30000
     depends_on:
       - db
@@ -111,13 +111,13 @@ services:
   integracion-externa-service:
     image: jeankaled/integracion-externa-service:latest
     ports:
-      - "8083:8083"
+      - "8085:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_integraciones
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
       hikari:
-      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      maximum-pool-size: 5
       connection-timeout: 30000
     depends_on:
       - db
