@@ -8,7 +8,7 @@ spring:
       credentials:
         access-key: ${AWS_ACCESS_KEY}
         secret-key: ${AWS_SECRET_KEY}
-        session-token: ${AWS_SESSION_TOKEN} # <-- Esta es obligatoria en Academy
+        session-token: ${AWS_SESSION_TOKEN}
 
   # Configuración de base de datos
   datasource:
