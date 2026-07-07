@@ -2,8 +2,6 @@ package cl.sanosysalvos.notificacion_service.infrastructure.messaging;
 
 import org.springframework.stereotype.Component;
 
-import io.awspring.cloud.sqs.annotation.SqsListener;
-
 /**
  * Consumidor de mensajes de AWS SQS.
  * Escucha eventos de forma asíncrona (ej. cuando se pierde una mascota)
@@ -14,7 +12,7 @@ public class SqsNotificationConsumer {
 
     // La anotación @SqsListener hace toda la magia.
     // Se queda escuchando la cola que definimos en el application.yml
-    @SqsListener("${aws.sqs.queue-name}")
+   // @SqsListener("${aws.sqs.queue-name}")
     public void recibirMensaje(String mensaje) {
         System.out.println("\n=======================================================");
         System.out.println("  NUEVA NOTIFICACIÓN RECIBIDA DESDE AWS SQS ");
