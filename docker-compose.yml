@@ -9,6 +9,9 @@ services:
       POSTGRES_DB: sanos_y_salvos_db
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
+      hikari:
+      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      connection-timeout: 30000
     ports:
       - "5432:5432"
     volumes:
@@ -29,6 +32,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_usuarios
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      hikari:
+      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      connection-timeout: 30000
     depends_on:
       - db
     deploy:
@@ -47,6 +53,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_mascota
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      hikari:
+      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      connection-timeout: 30000
     depends_on:
       - db
     deploy:
@@ -65,6 +74,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_notificaciones
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      hikari:
+      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      connection-timeout: 30000
     depends_on:
       - db
     deploy:
@@ -83,6 +95,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_analitica
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      hikari:
+      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      connection-timeout: 30000
     depends_on:
       - db
     deploy:
@@ -101,6 +116,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/db_sanos_integraciones
       SPRING_DATASOURCE_USERNAME: admin
       SPRING_DATASOURCE_PASSWORD: admin
+      hikari:
+      maximum-pool-size: 5 # <--- ESTO EVITARÁ EL ERROR DE "TOO MANY CLIENTS"
+      connection-timeout: 30000
     depends_on:
       - db
     deploy:
