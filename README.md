@@ -22,13 +22,18 @@ Despliegue en la Nube (Docker Swarm)
 Para desplegar la infraestructura en el clúster de AWS (Nodo Manager):
 
 Inicializar el clúster (si no está activo):
+
 bash
-    docker swarm init
+
+  docker swarm init
 Despliegue del Stack:
+
 bash
-    docker stack deploy -c docker-compose.yml sanos_stack
+
+   docker stack deploy -c docker-compose.yml sanos_stack
 Verificación:
-    docker service ls
+
+   docker service ls
 
 3. Arquitectura Asíncrona (Event-Driven)
 El sistema desacopla procesos pesados (como el envío de notificaciones) para reducir la latencia de respuesta al usuario:
