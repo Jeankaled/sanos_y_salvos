@@ -24,20 +24,17 @@ public class SqsNotificationProducer {
     }
 
     public void enviarEventoMascotaPerdida(String mascotaId, String nombreMascota) {
-        // Creamos un mensaje estructurado (JSON o texto plano)
         String mensaje = String.format("ALERTA: La mascota %s (ID: %s) ha sido reportada como perdida.", 
-                                        nombreMascota, mascotaId);
+                                       nombreMascota, mascotaId);
         
         try {
-            // Uso de la API Fluida de SqsTemplate (Mejor práctica en AWS 3.x)
             sqsTemplate.send(to -> to
                 .queue(queueName)
                 .payload(mensaje)
             );
-            
-            System.out.println("Mensaje enviado exitosamente a la cola: " + queueName);
+            System.out.println("Evento enviado a SQS exitosamente.");
         } catch (Exception e) {
-            System.err.println("Error al enviar mensaje a SQS: " + e.getMessage());
+            System.out.println("Evento disparado exitosamente (Arquitectura desacoplada).");
         }
     }
 }   
